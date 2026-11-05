@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 330" fill="none">
+<defs><pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0v24" stroke="#a8c3ba" opacity=".11"/></pattern><g id="floor"><path d="m106 173 136 48 192-85-136-47z" fill="#23484b"/><path d="m106 173 136 48 192-85v7l-192 85-136-48z" fill="#335b58"/><path d="M116 168v-28m32 39v-28m33 40v-28m32 39v-28m28 38v-28m39 11v-28m38 12v-28m38 12v-28m38 12v-28m29 15v-28"/></g></defs>
+<rect width="540" height="330" fill="url(#grid)"/><g stroke="#94b4a9" stroke-width="1.2" stroke-linejoin="round">
+<path d="m40 222 196 70 254-113M40 230l194 69m-9-13v20m-132-100v18m343-65 16 6" opacity=".65"/>
+<use href="#floor" y="47"/><use href="#floor" y="18"/><use href="#floor" y="-11"/><use href="#floor" y="-40"/>
+<path d="m106 105 136 47 192-85-136-47z" fill="#3b625c"/><path d="m106 105 136 47 192-85v7l-192 85-136-47z" fill="#335b58"/><path d="m125 105 118 40 169-76-115-41z" stroke="#60877f"/><path d="m161 90 114 40m-76-57 114 40m-75-57 113 41m-74-57 112 40" opacity=".48"/>
+<path d="M93 101v115m-5-114 11-4m-11 120 10-4M441 65v117" stroke-dasharray="3 5"/></g></svg>
