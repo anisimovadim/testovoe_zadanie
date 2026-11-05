@@ -12,13 +12,13 @@ import {
   type Status,
   type Task,
 } from "./data";
+import { Badge as StatusBadge, Button, Form } from "react-bootstrap";
 import type { Edit } from "./Editor";
 export function Badge({ status }: { status: Status }) {
   return (
-    <span className={"badge " + status}>
-      <i />
+    <StatusBadge bg="" className={status}>
       {labels[status]}
-    </span>
+    </StatusBadge>
   );
 }
 export function TaskView({
@@ -104,18 +104,20 @@ export function TaskView({
         </div>
         {manager && (
           <div className="actions">
-            <button
+            <Button
+              variant="outline-secondary"
               onClick={() => edit({ kind: "task", task, siteId: task.site_id })}
             >
               <Pencil size={15} />
               Изменить
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline-secondary"
               aria-label="Удалить задачу"
               onClick={() => edit({ kind: "delete", task })}
             >
               <Trash2 size={15} />
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -134,9 +136,10 @@ export function TaskView({
           </dl>
           {actions.length > 0 && (
             <div className="transition">
-              <label>
+              <label className="field">
                 Комментарий
-                <textarea
+                <Form.Control
+                  as="textarea"
                   rows={3}
                   value={note}
                   maxLength={2000}
@@ -150,14 +153,14 @@ export function TaskView({
               </label>
               <div className="actions">
                 {actions.map(([s, t], i) => (
-                  <button
+                  <Button
                     key={s}
                     disabled={busy}
-                    className={i === 0 ? "primary" : ""}
+                    variant={i === 0 ? "primary" : "outline-secondary"}
                     onClick={() => move(s)}
                   >
                     {t}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>

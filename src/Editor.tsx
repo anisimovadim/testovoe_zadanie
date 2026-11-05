@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
-import { X } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { Modal, Form, Button, Alert } from "react-bootstrap";
 import { db, errorText, type Data, type Site, type Task } from "./data";
 export type Edit =
   | { kind: "site"; site?: Site }
@@ -12,12 +12,8 @@ type Props = {
   saved: (target?: string) => void;
 };
 export function Editor({ edit, data, close, saved }: Props) {
-  const ref = useRef<HTMLDialogElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  useEffect(() => {
-    ref.current?.showModal();
-  }, []);
   const site = "site" in edit ? edit.site : undefined;
   const task = "task" in edit ? edit.task : undefined;
   const removing = edit.kind === "delete";
@@ -80,126 +76,128 @@ export function Editor({ edit, data, close, saved }: Props) {
     }
   }
   return (
-    <dialog
-      ref={ref}
-      aria-labelledby="form-title"
-      onCancel={(e) => {
-        e.preventDefault();
+    <Modal
+      show
+      centered
+      onHide={() => {
         if (!busy) close();
       }}
+      backdrop={busy ? "static" : true}
+      keyboard={!busy}
+      aria-labelledby="form-title"
     >
-      <div className="dialog-title">
-        <h2 id="form-title">{title}</h2>
-        <button
-          className="iconbtn"
-          aria-label="Закрыть"
-          disabled={busy}
-          onClick={close}
-        >
-          <X size={18} />
-        </button>
-      </div>
-      <form onSubmit={submit}>
-        {removing ? (
-          <p>
-            «{site?.name || task?.title}» и история будут удалены
-            {site ? " вместе со всеми задачами объекта" : ""}. Восстановить
-            данные будет невозможно.
-          </p>
-        ) : edit.kind === "site" ? (
-          <>
-            <label>
-              Название объекта
-              <input
-                name="name"
-                autoFocus
-                required
-                maxLength={160}
-                defaultValue={site?.name}
-              />
-            </label>
-            <label>
-              Адрес
-              <input
-                name="address"
-                required
-                maxLength={300}
-                defaultValue={site?.address}
-              />
-            </label>
-          </>
-        ) : (
-          <>
-            <label>
-              Название задачи
-              <input
-                name="title"
-                autoFocus
-                required
-                maxLength={180}
-                defaultValue={task?.title}
-              />
-            </label>
-            <label>
-              Описание
-              <textarea
-                name="description"
-                rows={3}
-                maxLength={5000}
-                defaultValue={task?.description}
-              />
-            </label>
-            <label>
-              Объект
-              <select
-                aria-label="Объект"
-                name="site_id"
-                required
-                defaultValue={task?.site_id || edit.siteId}
-              >
-                {data.sites.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Исполнитель
-              <select
-                aria-label="Исполнитель"
-                name="assignee"
-                required
-                defaultValue={task?.assignee || ""}
-              >
-                <option value="" disabled>
-                  Выберите исполнителя
-                </option>
-                {data.profiles
-                  .filter((p) => p.role === "worker")
-                  .map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
+      <Modal.Header closeButton={!busy} closeLabel="Закрыть">
+        <Modal.Title id="form-title">{title}</Modal.Title>
+      </Modal.Header>
+      <Form onSubmit={submit}>
+        <Modal.Body>
+          {removing ? (
+            <p>
+              «{site?.name || task?.title}» и история будут удалены
+              {site ? " вместе со всеми задачами объекта" : ""}. Восстановить
+              данные будет невозможно.
+            </p>
+          ) : edit.kind === "site" ? (
+            <>
+              <label className="field">
+                Название объекта
+                <Form.Control
+                  name="name"
+                  autoFocus
+                  required
+                  maxLength={160}
+                  defaultValue={site?.name}
+                />
+              </label>
+              <label className="field">
+                Адрес
+                <Form.Control
+                  name="address"
+                  required
+                  maxLength={300}
+                  defaultValue={site?.address}
+                />
+              </label>
+            </>
+          ) : (
+            <>
+              <label className="field">
+                Название задачи
+                <Form.Control
+                  name="title"
+                  autoFocus
+                  required
+                  maxLength={180}
+                  defaultValue={task?.title}
+                />
+              </label>
+              <label className="field">
+                Описание
+                <Form.Control
+                  as="textarea"
+                  name="description"
+                  rows={3}
+                  maxLength={5000}
+                  defaultValue={task?.description}
+                />
+              </label>
+              <label className="field">
+                Объект
+                <Form.Select
+                  aria-label="Объект"
+                  name="site_id"
+                  required
+                  defaultValue={task?.site_id || edit.siteId}
+                >
+                  {data.sites.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
                     </option>
                   ))}
-              </select>
-            </label>
-          </>
-        )}
-        {error && (
-          <div role="alert" className="error">
-            {error}
-          </div>
-        )}
-        <footer>
-          <button type="button" disabled={busy} onClick={close}>
+                </Form.Select>
+              </label>
+              <label className="field">
+                Исполнитель
+                <Form.Select
+                  aria-label="Исполнитель"
+                  name="assignee"
+                  required
+                  defaultValue={task?.assignee || ""}
+                >
+                  <option value="" disabled>
+                    Выберите исполнителя
+                  </option>
+                  {data.profiles
+                    .filter((p) => p.role === "worker")
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                </Form.Select>
+              </label>
+            </>
+          )}
+          {error && <Alert variant="danger">{error}</Alert>}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            type="button"
+            disabled={busy}
+            onClick={close}
+          >
             Отмена
-          </button>
-          <button className={removing ? "danger" : "primary"} disabled={busy}>
+          </Button>
+          <Button
+            type="submit"
+            variant={removing ? "danger" : "primary"}
+            disabled={busy}
+          >
             {busy ? "Сохранение…" : removing ? "Удалить" : "Сохранить"}
-          </button>
-        </footer>
-      </form>
-    </dialog>
+          </Button>
+        </Modal.Footer>
+      </Form>
+    </Modal>
   );
 }

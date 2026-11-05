@@ -1,16 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { ArrowRight, Layers3, LockKeyhole, Eye, EyeOff } from "lucide-react";
+import { Button, Card, Form, Alert, InputGroup } from "react-bootstrap";
 import { client, db, errorText } from "./data";
-export function Brand() {
-  return (
-    <div className="brand">
-      <span className="mark">
-        <Layers3 size={23} />
-      </span>
-      Контур<span className="brand-sub">CRM</span>
-    </div>
-  );
-}
 export function Login() {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
@@ -34,66 +24,50 @@ export function Login() {
   }
   return (
     <main className="login">
-      <section className="cover">
-        <Brand />
-        <div className="cover-body">
-          <div className="eyebrow">Строительное управление</div>
-          <h1>
-            Объекты
-            <br />и задачи<span>.</span>
-          </h1>
-          <img
-            src="/blueprint.svg"
-            alt="Аксонометрический чертёж каркаса здания"
-          />
-        </div>
-      </section>
-      <section className="login-pane">
-        <form onSubmit={submit}>
-          <div className="login-icon">
-            <LockKeyhole size={22} />
-          </div>
-          <h2>Вход в систему</h2>
-          <p className="muted">Введите данные рабочего аккаунта.</p>
-          <label>
-            Электронная почта
-            <input
-              name="email"
-              type="email"
-              placeholder="name@company.ru"
-              autoComplete="username"
-              required
-            />
-          </label>
-          <label>
-            Пароль
-            <span className="password">
-              <input
-                name="password"
-                type={visible ? "text" : "password"}
-                autoComplete="current-password"
+      <Card as="section" className="login-card">
+        <Card.Body>
+          <h1>Вход в систему</h1>
+          <p className="text-secondary mb-4">Объекты и задачи</p>
+          <Form onSubmit={submit}>
+            <Form.Group controlId="login-email" className="mb-3">
+              <Form.Label>Электронная почта</Form.Label>
+              <Form.Control
+                name="email"
+                type="email"
+                autoComplete="username"
                 required
               />
-              <button
-                type="button"
-                aria-label={visible ? "Скрыть пароль" : "Показать пароль"}
-                onClick={() => setVisible(!visible)}
-              >
-                {visible ? <EyeOff size={17} /> : <Eye size={17} />}
-              </button>
-            </span>
-          </label>
-          {(!client || error) && (
-            <div role="alert" className="error">
-              {error ||
-                "Для запуска укажите адрес Supabase и публичный ключ в .env.local."}
-            </div>
-          )}
-          <button disabled={busy || !client} className="primary login-submit">
-            {busy ? "Вход…" : "Войти"} <ArrowRight size={17} />
-          </button>
-        </form>
-      </section>
+            </Form.Group>
+            <Form.Group controlId="login-password" className="mb-4">
+              <Form.Label>Пароль</Form.Label>
+              <InputGroup>
+                <Form.Control
+                  name="password"
+                  type={visible ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                />
+                <Button
+                  variant="outline-secondary"
+                  type="button"
+                  aria-label={visible ? "Скрыть пароль" : "Показать пароль"}
+                  onClick={() => setVisible(!visible)}
+                >
+                  {visible ? "Скрыть" : "Показать"}
+                </Button>
+              </InputGroup>
+            </Form.Group>
+            {(!client || error) && (
+              <Alert variant="danger">
+                {error || "Укажите параметры Supabase в .env.local."}
+              </Alert>
+            )}
+            <Button type="submit" className="w-100" disabled={busy || !client}>
+              {busy ? "Вход…" : "Войти"}
+            </Button>
+          </Form>
+        </Card.Body>
+      </Card>
     </main>
   );
 }

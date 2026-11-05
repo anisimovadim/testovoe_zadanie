@@ -2,18 +2,13 @@ import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import type { Session } from "@supabase/supabase-js";
 import {
-  Building2,
-  ListChecks,
   LogOut,
   Plus,
-  ArrowUpRight,
   MapPin,
-  Search,
   Pencil,
   Trash2,
   ArrowLeft,
   RefreshCw,
-  Layers3,
 } from "lucide-react";
 import {
   client,
@@ -25,9 +20,11 @@ import {
   type Task,
   type Status,
 } from "./data";
-import { Brand, Login } from "./Login";
+import { Login } from "./Login";
 import { Editor, type Edit } from "./Editor";
 import { Badge, TaskView } from "./TaskView";
+import { Button, Form, Navbar, Nav, Container, Table } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
 const roleName = { manager: "Постановщик", worker: "Исполнитель" };
 function TaskList({ tasks, data }: { tasks: Task[]; data: Data }) {
@@ -39,7 +36,7 @@ function TaskList({ tasks, data }: { tasks: Task[]; data: Data }) {
         <h2>
           Список задач <span className="counter">{tasks.length}</span>
         </h2>
-        <select
+        <Form.Select
           aria-label="Фильтр по статусу"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
@@ -50,10 +47,10 @@ function TaskList({ tasks, data }: { tasks: Task[]; data: Data }) {
               {l}
             </option>
           ))}
-        </select>
+        </Form.Select>
       </div>
       <div className="table-wrap">
-        <table>
+        <Table responsive hover className="mb-0">
           <thead>
             <tr>
               <th>Задача</th>
@@ -76,7 +73,7 @@ function TaskList({ tasks, data }: { tasks: Task[]; data: Data }) {
               </tr>
             ))}
           </tbody>
-        </table>
+        </Table>
         {!rows.length && (
           <p className="empty">
             {tasks.length ? "Нет задач с таким статусом" : "Задач пока нет"}
@@ -136,56 +133,56 @@ function Workspace({ user }: { user: string }) {
   }
   return (
     <div className="shell">
-      <aside>
-        <Brand />
-        <nav>
-          <a href="#sites" className={!mine ? "selected" : ""}>
-            <Building2 size={18} />
-            Объекты
-          </a>
-          {me && !manager && (
-            <a href="#mine" className={mine ? "selected" : ""}>
-              <ListChecks size={18} />
-              Мои задачи
-            </a>
-          )}
-        </nav>
-        <div className="user">
-          <span className="avatar">
-            {me?.name
-              .split(" ")
-              .slice(0, 2)
-              .map((x) => x[0])
-              .join("")}
-          </span>
-          <div>
-            <strong>{me?.name || "Аккаунт"}</strong>
-            <small>{me && roleName[me.role]}</small>
-          </div>
-          <button aria-label="Выйти" title="Выйти" onClick={logout}>
-            <LogOut size={16} />
-          </button>
-        </div>
-      </aside>
-      <main className="content">
-        <header>
-          <span>
-            <Layers3 size={16} />
-            Рабочее пространство
-          </span>
-          <button
-            className="iconbtn"
-            title="Обновить"
-            aria-label="Обновить"
-            onClick={refresh}
+      <Navbar className="topbar">
+        <Container className="top-inner">
+          <Nav
+            variant="underline"
+            activeKey={mine ? "mine" : "sites"}
+            aria-label="Разделы"
           >
-            <RefreshCw size={16} />
-          </button>
-        </header>
+            <Nav.Link href="#sites" eventKey="sites">
+              Объекты
+            </Nav.Link>
+            {me && !manager && (
+              <Nav.Link href="#mine" eventKey="mine">
+                Мои задачи
+              </Nav.Link>
+            )}
+          </Nav>
+          <div className="account">
+            <span>
+              {me?.name}
+              <small>{me && roleName[me.role]}</small>
+            </span>
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              title="Обновить"
+              aria-label="Обновить"
+              onClick={refresh}
+            >
+              <RefreshCw size={16} />
+            </Button>
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              aria-label="Выйти"
+              title="Выйти"
+              onClick={logout}
+            >
+              <LogOut size={16} />
+            </Button>
+          </div>
+        </Container>
+      </Navbar>
+      <main className="container content">
         <article>
           {error && (
             <div className="error" role="alert">
-              {error} <button onClick={refresh}>Повторить</button>
+              {error}{" "}
+              <Button variant="outline-secondary" onClick={refresh}>
+                Повторить
+              </Button>
             </div>
           )}
           {!data ? (
@@ -196,83 +193,57 @@ function Workspace({ user }: { user: string }) {
             <>
               <div className="heading">
                 <div>
-                  <div className="eyebrow">Реестр объектов</div>
                   <h1>Объекты</h1>
                 </div>
                 {manager && (
-                  <button
-                    className="primary"
+                  <Button
+                    variant="primary"
+
                     onClick={() => setEdit({ kind: "site" })}
                   >
                     <Plus size={17} />
                     Новый объект
-                  </button>
+                  </Button>
                 )}
               </div>
-              <div className="stats">
-                {[
-                  ["Объекты", data.sites.length],
-                  ["Задачи", data.tasks.length],
-                  [
-                    "На проверке",
-                    data.tasks.filter((t) => t.status === "review").length,
-                  ],
-                ].map(([l, n]) => (
-                  <div key={l}>
-                    <small>{l}</small>
-                    <strong>{String(n).padStart(2, "0")}</strong>
-                  </div>
-                ))}
-              </div>
-              <div className="section-head">
-                <h2>Список объектов</h2>
-                <label className="search">
-                  <Search size={16} />
-                  <input
-                    aria-label="Поиск объектов"
-                    placeholder="Название или адрес"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                  />
-                </label>
-              </div>
-              <div className="cards">
-                {sites.map((s) => {
-                  const tasks = data.tasks.filter((t) => t.site_id === s.id),
-                    done = tasks.filter((t) => t.status === "accepted").length;
-                  return (
-                    <a className="card" key={s.id} href={"#site/" + s.id}>
-                      <div className="card-top">
-                        <span className="building">
-                          <Building2 size={23} />
-                        </span>
-                        <ArrowUpRight size={18} />
-                      </div>
-                      <h3>{s.name}</h3>
-                      <p>
-                        <MapPin size={14} />
-                        {s.address}
-                      </p>
-                      <div className="card-bottom">
-                        <span>
-                          Задач <b>{tasks.length}</b>
-                        </span>
-                        <span>
-                          Принято <b>{done}</b>
-                        </span>
-                      </div>
-                      <div className="bar">
-                        <i
-                          style={{
-                            width:
-                              (tasks.length ? (done / tasks.length) * 100 : 0) +
-                              "%",
-                          }}
-                        />
-                      </div>
-                    </a>
-                  );
-                })}
+              <Form.Control
+                className="site-search"
+                type="search"
+                aria-label="Поиск объектов"
+                placeholder="Поиск по названию или адресу"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              <div className="table-wrap">
+                <Table responsive hover className="mb-0">
+                  <thead>
+                    <tr>
+                      <th>Объект</th>
+                      <th>Адрес</th>
+                      <th className="text-end">Задач</th>
+                      <th className="text-end">На проверке</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sites.map((s) => {
+                      const tasks = data.tasks.filter(
+                        (t) => t.site_id === s.id,
+                      );
+                      return (
+                        <tr key={s.id}>
+                          <td>
+                            <a href={"#site/" + s.id}>{s.name}</a>
+                          </td>
+                          <td>{s.address}</td>
+                          <td className="text-end">{tasks.length}</td>
+                          <td className="text-end">
+                            {tasks.filter((t) => t.status === "review").length}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </Table>
               </div>
               {sites.length === 0 && (
                 <p className="empty">
@@ -282,7 +253,6 @@ function Workspace({ user }: { user: string }) {
             </>
           ) : mine && !manager ? (
             <>
-              <div className="eyebrow">Персональный список</div>
               <h1>Мои задачи</h1>
               <TaskList
                 tasks={data.tasks.filter((t) => t.assignee === user)}
@@ -297,7 +267,6 @@ function Workspace({ user }: { user: string }) {
               </a>
               <div className="heading">
                 <div>
-                  <div className="eyebrow">Карточка объекта</div>
                   <h1>{site.name}</h1>
                   <p className="address">
                     <MapPin size={16} />
@@ -306,27 +275,32 @@ function Workspace({ user }: { user: string }) {
                 </div>
                 {manager && (
                   <div className="actions">
-                    <button onClick={() => setEdit({ kind: "site", site })}>
+                    <Button
+                      variant="outline-secondary"
+                      onClick={() => setEdit({ kind: "site", site })}
+                    >
                       <Pencil size={15} />
                       Изменить
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="outline-secondary"
                       aria-label="Удалить объект"
                       onClick={() => setEdit({ kind: "delete", site })}
                     >
                       <Trash2 size={15} />
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
               {manager && (
-                <button
-                  className="primary"
+                <Button
+                  variant="primary"
+
                   onClick={() => setEdit({ kind: "task", siteId: site.id })}
                 >
                   <Plus size={16} />
                   Новая задача
-                </button>
+                </Button>
               )}
               <TaskList
                 data={data}
